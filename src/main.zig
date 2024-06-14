@@ -22,11 +22,20 @@ pub fn main() !void {
         var walker = try workingDir.walk(allocator);
         defer walker.deinit();
         while(try walker.next()) |entry| {
-            const newName = getNewName(entry.path);
-            print("Are you sure you want to rename the file: {s}\n", .{entry.basename});
+            var newName: [std.math.maxInt(u8)]u8 = undefined;
+            getNewName(entry.basename, &newName);
+            var len: usize = undefined;
+            for(0..newName.len) |k| {
+                if(newName[k] == 0) {
+                    len = i;
+                    break;
+                }
+            }
+            const newPath = newName [0..len];
+            print("Are you sure you want to change \"{s}\" to \"{s}\"?\n", .{entry.basename, newName});
             if(try isSure()) {
-                print("Ok here is the new name: {s}\n", .{newName});
-                try workingDir.rename(entry.basename, newName);
+                try workingDir.rename(entry.basename, newPath);
+                print("Changed name succesfully!\n", .{});
             }
         }
     }
@@ -44,8 +53,7 @@ fn isSure() !bool {
     }
 }
 
-fn getNewName(path: [] const u8) [] const u8 {
-    var newPath: [std.math.maxInt(u8)] u8 = undefined;
+fn getNewName(path: [] const u8, newPath: []u8) void {
     for(0..newPath.len) |i| {
         newPath[i] = 0;
     }
@@ -54,15 +62,10 @@ fn getNewName(path: [] const u8) [] const u8 {
     for (path, 0..) |char, i| {
         if ((char <= 'z' and char >= 'a') or (char <= 'Z' and char >= 'A')) {
             for (i..path.len) |j| {
-                newPath[j - i] = path.ptr[j];
+                newPath[j - i] = path[j];
                 newlen += 1;
             }
             break;
         }
     }
-    for(0..newPath.len) |i| {
-        print("{c}", .{newPath[i]});
-    }
-    print("\n", .{});
-    return newPath[0..newlen];
 }
