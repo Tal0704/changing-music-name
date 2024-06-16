@@ -25,7 +25,6 @@ pub fn main() !void {
             var newName: [std.math.maxInt(u8)]u8 = undefined;
             const len = getNewName(entry.basename, &newName);
             const newPath = newName [0..len];
-            if(mem.eql(u8, newPath, entry.basename)) continue;
             print("Are you sure you want to change \"{s}\" to \"{s}\"?\n", .{entry.basename, newPath});
             if(try isSure()) {
                 try workingDir.rename(entry.basename, newPath);

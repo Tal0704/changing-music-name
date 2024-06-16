@@ -23,12 +23,20 @@ pub fn main() !void {
         defer walker.deinit();
         while(try walker.next()) |entry| {
             var newName: [std.math.maxInt(u8)]u8 = undefined;
-            const len = getNewName(entry.basename, &newName);
+            getNewName(entry.basename, &newName);
+            var len: usize = 0;
+            for(0..newName.len) |k| {
+                if(newName[k] == 0) {
+                    len = i;
+                    print("{c}\n", .{newName[k]});
+                    break;
+                }
+            }
             const newPath = newName [0..len];
-            if(mem.eql(u8, newPath, entry.basename)) continue;
-            print("Are you sure you want to change \"{s}\" to \"{s}\"?\n", .{entry.basename, newPath});
+            _ = newPath;
+            print("Are you sure you want to change \"{s}\" to \"{s}\"?\n", .{entry.basename, newName});
             if(try isSure()) {
-                try workingDir.rename(entry.basename, newPath);
+                // try workingDir.rename(entry.basename, newPath);
                 print("Changed name succesfully!\n", .{});
             }
         }
@@ -47,7 +55,7 @@ fn isSure() !bool {
     }
 }
 
-fn getNewName(path: [] const u8, newPath: []u8) u8 {
+fn getNewName(path: [] const u8, newPath: []u8) void {
     for(0..newPath.len) |i| {
         newPath[i] = 0;
     }
@@ -59,8 +67,8 @@ fn getNewName(path: [] const u8, newPath: []u8) u8 {
                 newPath[j - i] = path[j];
                 newlen += 1;
             }
-            return newlen;
+            return newLen;
+            break;
         }
     }
-    return 0;
 }
